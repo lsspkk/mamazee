@@ -2,10 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Hello Amazee</title>
+    <title>A Maze</title>
+    <link rel="stylesheet" type="text/css" href="style.css"></link>
+
   </head>
   <body>
+    <div id="display"></div>
+    <div id="info"></div>
+    <div id="control">
+      <div>
+      <h3>A Maze</h3>
+      <button id="launch">Start</button>
+      <button id="stop">Stop</button>
+
+    </div>
+
+      <div>
+      <h6>System</h6>
+      <button id="start-end" >SE</button>
+      <button id="end" >E</button>
+    </div>
+    </div>
     <script src="node_modules/pixi.js/dist/browser/pixi.min.js"></script>
-    <script type="text/javascript" src="index.js"></script>
+    <script type="module" src="view.js"></script>
+    <script type="module" src="maze.js"></script>
+    <script type="module" src="app.js"></script>
+    <script type="module" src="info.js"></script>
   </body>
 </html>
