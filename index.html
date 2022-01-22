@@ -1,32 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>A Maze</title>
-    <link rel="stylesheet" type="text/css" href="style.css"></link>
 
-  </head>
-  <body>
-    <div id="display"></div>
-    <div id="info"></div>
-    <div id="control">
+<head>
+  <meta charset="utf-8" />
+  <title>A Maze</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  </link>
+
+</head>
+
+<body>
+  <div id="display"></div>
+  <div id="info"></div>
+  <div id="control">
       <div>
-      <h3>A Maze</h3>
-      <button id="launch">Start</button>
-      <button id="stop">Stop</button>
+        <h4>Maze Engine</h4>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset</button>
 
-    </div>
+      </div>
 
       <div>
-      <h6>System</h6>
-      <button id="start-end" >SE</button>
-      <button id="end" >E</button>
-    </div>
-    </div>
-    <script src="node_modules/pixi.js/dist/browser/pixi.min.js"></script>
-    <script type="module" src="view.js"></script>
-    <script type="module" src="maze.js"></script>
-    <script type="module" src="app.js"></script>
-    <script type="module" src="info.js"></script>
-  </body>
+        <h4>Route System</h4>
+        <button id="first">first</button>
+        <button id="last">last</button>
+      </div>
+      <div>
+        <h4>World</h4>
+        <form>
+          <label><input type="radio" name="size" value="s" id="s">S</label>
+          <label><input checked type="radio" name="size" value="m" id="m">M</label>
+          <label><input type="radio" name="size" value="l" id="l">L</label>
+        </form>
+      </div>
+  </div>
+  <script src="node_modules/pixi.js/dist/browser/pixi.min.js"></script>
+  <script type="module" src="view.js"></script>
+  <script type="module" src="maze.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="info.js"></script>
+</body>
+
 </html>

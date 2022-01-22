@@ -1,8 +1,11 @@
-import { engine } from './view'
+import { resetInfo } from './info.js'
+import { world } from './maze.js'
+import { resetMaze, setEngineSpeed } from './view.js'
 
 export const state = {
   system: 0,
-  choises: ['start-end', 'end', 'stop'],
+  choises: ['first', 'last'],
+  speed: 1,
 }
 
 export const menu = []
@@ -26,13 +29,6 @@ function setSystem(choice) {
   state.system = state.choises.findIndex((c) => c === choice)
   console.debug({ state })
   activate()
-  if (choice === 'stop') stop()
-}
-function launch() {
-  console.log('start')
-}
-function stop() {
-  engine.speed = '0'
 }
 
 document.addEventListener(
@@ -66,4 +62,27 @@ document.addEventListener(
 )
 
 activate()
-document.getElementById('launch').onclick = () => launch()
+const buttons = {
+  start: document.getElementById('start'),
+  stop: document.getElementById('stop'),
+  reset: document.getElementById('reset'),
+}
+function getSize() {
+  return document.forms[0].elements['size'].value
+}
+function r(s) {
+  return Math.floor((Math.random() * (s - 1)) / 2 + s / 4)
+}
+buttons.start.onclick = () => setEngineSpeed(state.speed)
+buttons.stop.onclick = () => setEngineSpeed(0)
+buttons.reset.onclick = () => {
+  setEngineSpeed(0)
+  const s = getSize()
+  const size = s === 's' ? 20 : s === 'm' ? 40 : 80
+  world.height = size
+  world.width = size
+  world.start = [r(size), r(size)]
+  console.log({ world })
+  resetMaze()
+  resetInfo()
+}

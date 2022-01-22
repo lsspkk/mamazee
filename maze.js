@@ -1,5 +1,3 @@
-import { engine } from './view.js'
-
 export const t = {
   UP_DOWN: [0, 0],
   LEFT_RIGHT: [0, 1],
@@ -12,7 +10,8 @@ export const t = {
   LEFT_RIGHT_DOWN: [1, 2],
   LEFT_RIGHT_UP: [1, 3],
   EMPTY: [9, 9],
-  DEAD_END: [2, 0],
+  DEAD_END_SPECIAL: [2, 0],
+  DEAD_END_NORMAL: [4, 4],
   STAR: [1, 4],
 }
 
@@ -140,7 +139,7 @@ export function followMaze(x, y, move) {
 
 var count = 0
 export function findCrossroads(x, y, tiles) {
-  if (count > 1000000) throw new Error('hi')
+  if (count > 1000000) throw new Error('a million crossroads searched, bye now')
   do {
     const { move } = tiles[x][y]
     const choises = getChoises(x, y, tiles)
@@ -180,25 +179,4 @@ export function backWard(move) {
   if (move === 'up') return 'down'
   if (move === 'down') return 'up'
   return 'dead-end'
-}
-let lastTiles = []
-export function placeTile(x, y, name, tile, move, back, tiles, turn) {
-  lastTiles.push(move)
-  if (lastTiles.length > 20) {
-    const ends = lastTiles.filter((e) => e === 'dead-end')
-    //console.log({ ends })
-    if (ends.length > 20) {
-      lastTiles = []
-      throw new Error('deadlock')
-    }
-
-    lastTiles.shift()
-  }
-  tile.name = name
-  tile.x = x * 20 + 10
-  tile.y = y * 20 + 10
-  tile.anchor.x = 0.5
-  tile.anchor.y = 0.5
-  const life = engine.life
-  tiles[x][y] = { tile, name, move, back, turn, life }
 }
