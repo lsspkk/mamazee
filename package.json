@@ -2,7 +2,7 @@
   "name": "mamazee",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build --polyfill-node",

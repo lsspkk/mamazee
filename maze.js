@@ -16,8 +16,8 @@ export const t = {
 }
 
 export const initialworld = {
-  height: 80,
-  width: 80,
+  height: 40,
+  width: 40,
   start: [19, 19],
   end: [19, 39],
   current: {
