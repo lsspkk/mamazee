@@ -13,7 +13,7 @@ import {
 } from './maze.js'
 
 import { randomColor, setInfo } from './info.js'
-
+import * as PIXI from 'pixi.js'
 const { Texture, Sprite, Rectangle } = PIXI
 
 // The application will create a renderer using WebGL, if possible,
