@@ -37,3 +37,9 @@ lähtöpisteestä alkaen täytä ruutua siten että
         1 = jako
         joka 100:s, jako
         5:n jälkeen painota mutkaa
+
+
+
+# dev
+
+https://www.snowpack.dev/tutorials/getting-started
