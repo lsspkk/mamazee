@@ -26,33 +26,20 @@ export const initialworld = {
   previous: {
     location: [],
   },
+  grid: []
 }
-// export const initialworld = {
-//   height: 40,
-//   width: 40,
-//   start: [19, 19],
-//   end: [19, 39],
-//   current: {
-//     location: [],
-//   },
-//   previous: {
-//     location: [],
-//   },
-// }
-// export const initialworld = {
-//   height: 20,
-//   width: 20,
-//   start: [9, 9],
-//   end: [9, 19],
-//   current: {
-//     location: [],
-//   },
-//   previous: {
-//     location: [],
-//   },
-// }
 
 export let world = initialworld
+
+export function clearWorld() {
+  world.grid = [...Array(world.height).keys()]
+    .map((x) => [...Array(world.width).keys()].map(y => {
+      const name = isStart(x, y) ? t.STAR : t.EMPTY
+      return { name }
+    })
+  )
+}
+
 
 export function isStart(x, y) {
   return x === world.start[0] && y === world.start[1]
@@ -61,28 +48,28 @@ export function isEnd(x, y) {
   return x === world.end[0] && y === world.end[1]
 }
 
-export function isBlocked(x, y, tiles) {
-  const { name } = tiles[x][y]
+export function isBlocked(x, y ) {
+  const { name } = world.grid[x][y]
   return (name[0] !== t.EMPTY[0] && name[1] !== t.EMPTY[1]) || (x === world.start[0] && y === world.start[1])
 }
 
-export function getChoises(x, y, tiles) {
+export function getChoises(x, y ) {
   let choises = []
-  if (x !== 0 && !isBlocked(x - 1, y, tiles)) {
+  if (x !== 0 && !isBlocked(x - 1, y)) {
     choises.push(['left', x - 1, y])
   }
-  if (x !== world.width - 1 && !isBlocked(x + 1, y, tiles)) {
+  if (x !== world.width - 1 && !isBlocked(x + 1, y)) {
     choises.push(['right', x + 1, y])
   }
-  if (y !== 0 && !isBlocked(x, y - 1, tiles)) {
+  if (y !== 0 && !isBlocked(x, y - 1)) {
     choises.push(['up', x, y - 1])
   }
-  if (y !== world.height - 1 && !isBlocked(x, y + 1, tiles)) {
+  if (y !== world.height - 1 && !isBlocked(x, y + 1)) {
     choises.push(['down', x, y + 1])
   }
   return choises
 }
-export function rMove([x, y], tiles) {
+export function rMove([x, y]) {
   return
 }
 
@@ -108,25 +95,30 @@ export function getNextTileName(move, lastMove) {
   return t.EMPTY
 }
 
-export function makeMove(tiles) {
-  let [, x, y] = world.current.location
-  const choises = getChoises(x, y, tiles)
+export function makeMove(life) {
+  let [lastMove, x, y] = world.current.location
+  const choises = getChoises(x, y)
   if (choises.length === 0) {
     throw new Error('dead-end')
   }
   const choice = Math.floor(Math.random() * choises.length)
-  return choises[choice]
+  if( !life ) return choises[choice]
+  const [move, newx,newy] = choises[choice]
+  const name = getNextTileName(move, lastMove)
+  const back =  backWard(lastMove)
+  world.grid[x][y] = { name, move, back, turn: '', life }
+  return [move, newx,newy]
 }
 export function chooseNewDirection(choises) {
   const choice = Math.floor(Math.random() * choises.length)
   return choises[choice]
 }
 
-export function makeStartMove(tiles) {
+export function makeStartMove() {
   const [x, y] = world.start
   world.previous.location = world.current.location = ['start', x, y]
-  world.current.location = makeMove(tiles)
-  tiles[x][y].move = world.current.location[0]
+  world.current.location = makeMove(0)
+  world.grid[x][y].move = world.current.location[0]
 }
 
 export function followMaze(x, y, move) {
@@ -138,11 +130,11 @@ export function followMaze(x, y, move) {
 }
 
 var count = 0
-export function findCrossroads(x, y, tiles) {
-  if (count > 1000000) throw new Error('a million crossroads searched, bye now')
+export function findCrossroads(x, y, life) {
+  if (count > 42424242) throw new Error('a million crossroads searched, bye now')
   do {
-    const { move } = tiles[x][y]
-    const choises = getChoises(x, y, tiles)
+    const { move } = world.grid[x][y]
+    const choises = getChoises(x, y)
     if (choises.length === 0 || (x === world.start[0] && y === world.start[1])) {
       const [dx, dy] = followMaze(x, y, move)
       x += dx
@@ -151,13 +143,18 @@ export function findCrossroads(x, y, tiles) {
       count++
     } else {
       //console.log('found choises', choises)
-      return [x, y, choises]
+      const newDirection = chooseNewDirection(choises)
+      const name = crossRoadTileName(x, y, newDirection)
+      const { move, back } = world.grid[x][y]
+      world.grid[x][y] = { name, move, back, turn: newDirection[0], life }
+
+      return [name, x, y, newDirection]
     }
   } while (true)
 }
 
-export function crossRoadTileName(x, y, newDirection, tiles) {
-  const current = tiles[x][y]
+export function crossRoadTileName(x, y, newDirection) {
+  const current = world.grid[x][y]
   let walls = ['up', 'down', 'left', 'right'].filter(
     (w) => w !== newDirection[0] && w !== current.move && w !== current.back
   )

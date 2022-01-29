@@ -10,6 +10,7 @@ import {
   findCrossroads,
   crossRoadTileName,
   backWard,
+  clearWorld,
 } from './maze.js'
 
 import { randomColor, setInfo } from './info.js'
@@ -43,25 +44,26 @@ function makeNamedTile([x, y], tileset) {
   return makeTile(x, y, tileset)
 }
 
-let lastTiles = []
-export function placeTile(tiles, x, y, { name, tile, move, back, turn }) {
-  lastTiles.push(move)
-  if (lastTiles.length > 20) {
-    const ends = lastTiles.filter((e) => e === 'dead-end')
-    //console.log({ ends })
-    if (ends.length > 20) {
-      lastTiles = []
-      throw new Error('deadlock')
-    }
+//let lastTiles = []
+export function placeTile(tiles, x, y, name, tile) {
+  // lastTiles.push(move)
+  // if (lastTiles.length > 20) {
+  //   const ends = lastTiles.filter((e) => e === 'dead-end')
+  //   //console.log({ ends })
+  //   if (ends.length > 20) {
+  //     lastTiles = []
+  //     throw new Error('deadlock')
+  //   }
 
-    lastTiles.shift()
-  }
-  tile.name = name
+  //   lastTiles.shift()
+  // }
   tile.x = x * 20 + 10
+
   tile.y = y * 20 + 10
   tile.anchor.x = 0.5
   tile.anchor.y = 0.5
-  tiles[x][y] = { tile, name, move, back, turn: turn ? turn : '', life: engine.life }
+  tiles[x][y] = { tile, name }
+  app.stage.addChild(tile)
 }
 
 export const engine = {
@@ -84,7 +86,7 @@ function clearEngine() {
   engine.crossQueue = []
 }
 
-export function clearMap(tiles, tileset) {
+export function clearMapTiles(tiles) {
   if (tiles) {
     tiles.forEach((row) =>
       row.forEach((column) => {
@@ -93,12 +95,11 @@ export function clearMap(tiles, tileset) {
       })
     )
   }
-  const grid = [...Array(world.height).keys()].map((x) => [...Array(world.width).keys()])
-
-  return grid.map((row, y) =>
-    row.map((column, x) => {
+}
+export function createMapTiles(tileset) {
+  return world.grid.map((row, y) =>
+    row.map(({name}, x) => {
       //const tile = randomTile(textures)
-      const name = isStart(x, y) ? t.STAR : t.EMPTY
       const tile = makeNamedTile(name, tileset)
       tile.x = x * 20 + 10
       tile.y = y * 20 + 10
@@ -115,27 +116,16 @@ function createCrossroadsAndContinue(tiles, tileset) {
   while (true) {
     try {
       if (engine.crossQueue.length === 0) {
-        throw new Error('the end')
+        throw new Error('the end: no place to start another route')
       }
       const [sx, sy] = engine.gear === 'first' ? engine.crossQueue[0] : engine.crossQueue[engine.crossQueue.length - 1]
-      const crossRoads = findCrossroads(sx, sy, tiles)
-      //console.log(tiles[sx][sy], JSON.stringify(crossRoads,null,2))
+      const [name, x, y, newDirection] = findCrossroads(sx, sy, engine.life)
 
-      // make crossroads
-      const [x, y, choises] = crossRoads
-      const newDirection = chooseNewDirection(choises)
-      const name = crossRoadTileName(x, y, newDirection, tiles)
       const tile = makeNamedTile(name, tileset)
-      const { move, back } = tiles[x][y]
-      //app.stage.removeChild(tiles[x][y].tile)
-      //console.log({ x, y, crName, move, back, turn: newDirection[0] })
-      placeTile(tiles, x, y, { name, tile, move, back, turn: newDirection[0] })
-      app.stage.addChild(tile)
+      placeTile(tiles, x, y, name, tile)
       world.current.location = newDirection
       engine.crossQueue.push([newDirection[1], newDirection[2]])
       return
-      //console.log(JSON.stringify(world,null,2))
-      throw new Error('hi')
     } catch (error) {
       if (error.message === 'no route found') {
         //console.log(engine.crossQueue[0], { engine })
@@ -143,31 +133,44 @@ function createCrossroadsAndContinue(tiles, tileset) {
         if (engine.gear === 'first') engine.crossQueue.shift()
         if (engine.gear === 'last') engine.crossQueue.pop()
       } else {
-        console.log('another error from crossroads', { error })
         throw error
       }
     }
   }
 }
+
+let deadEndCounter = 0
 function runEngine(tiles, tileset, goals) {
+  if( deadEndCounter > 20 ) {
+    throw new Error('deadlock')
+  }
+
+
   world.previous.location = [...world.current.location]
   let [lastMove, x, y] = world.current.location
+  setInfo(x, y, engine.routeCount, engine.routeColor) 
   try {
-    setInfo(x, y, engine.routeCount, engine.routeColor)
-    world.current.location = makeMove(tiles)
+    world.current.location = makeMove(engine.life)
+    const {name} = world.grid[x][y]
+    const tile = makeNamedTile(name, tileset)
+    placeTile(tiles, x, y, name, tile)
+    deadEndCounter = 0
+
   } catch (error) {
     //console.log(error.message)
     if (error.message === 'dead-end') {
+      deadEndCounter++
       if (engine.deadQueue.length % 10 === 0) {
         const anotherGear = engine.gear === 'first' ? 'last' : Math.random() < 0.1 ? 'first' : 'last'
         engine.gear = anotherGear
       }
       engine.deadQueue.push([x, y])
       const name = t.DEAD_END_NORMAL
+      world.grid[x][y] = { name, move: 'dead-end', turn: '', back: backWard(lastMove), life: engine.life}
+
+
       const tile = makeNamedTile(name, tileset)
-      placeTile(tiles, x, y, { name, tile, move: 'dead-end', back: backWard(lastMove) })
-      app.stage.addChild(tile)
-      //console.log('added_dead', { x, y, count: engine.count })
+      placeTile(tiles, x, y, name, tile)
       if (x === 0 || y === 0 || x === world.height - 1 || y === world.length - 1) {
         goals.push({ x, y, life: engine.life })
       }
@@ -178,23 +181,16 @@ function runEngine(tiles, tileset, goals) {
       return
     }
   }
-  const [move] = world.current.location
-
-  const name = getNextTileName(move, lastMove)
-  //console.log({lastMove, move, name, x, y})
-  //app.stage.removeChild(tiles[x][y].tile)
-  const tile = makeNamedTile(name, tileset)
-  placeTile(tiles, x, y, { name, tile, move, back: backWard(lastMove) })
-  app.stage.addChild(tile)
 }
 
 app.renderer.resize(world.width * 20, world.height * 20)
 export function resetMaze() {
   clearEngine()
-  // TODO why jamming
+  clearWorld()
+  clearMapTiles(tiles)
   app.renderer.resize(world.width * 20, world.height * 20)
-  tiles = clearMap(tiles, tileset)
-  makeStartMove(tiles)
+  tiles = createMapTiles(tileset)
+  makeStartMove()
   engine.crossQueue.push(world.start)
   goals = []
 }
@@ -209,7 +205,6 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
   let end = undefined
 
   resetMaze()
-
   app.ticker.speed = 3
   // Listen for frame updates
   app.ticker.add(() => {
@@ -219,7 +214,10 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
       if (engine.speed !== 0 && engine.life % engine.speed === 0) {
         if (engine.speed === 10) {
           while (true) runEngine(tiles, tileset, goals)
-        } else runEngine(tiles, tileset, goals)
+        } else 
+        {
+          runEngine(tiles, tileset, goals)
+        }
       }
     } catch (error) {
       if (error.message === 'the end' || error.message === 'deadlock') {
@@ -232,13 +230,13 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
         end.anchor.x = 0.5
         end.anchor.y = 0.5
         app.stage.addChild(end)
-        console.log(goals[0])
+        //console.log(goals[0])
 
         for (let i = 0; i < goals.length; i++) {
           const { x, y } = goals[i]
           const name = t.DEAD_END_SPECIAL
           const tile = makeNamedTile(name, tileset)
-          placeTile(tiles, x, y, { name, tile, move: 'dead-end', back: tiles[x][y].back })
+          placeTile(tiles, x, y, name, tile)
           app.stage.addChild(tile)
           i = i + i
         }
