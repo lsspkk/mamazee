@@ -14,27 +14,38 @@
   <div id="display"></div>
   <div id="info"></div>
   <div id="control">
-      <div>
-        <h4>Maze Engine</h4>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
-        <button id="reset">Reset</button>
+    <div>
+      <h4>Maze Engine</h4>
+      <button id="start">Start</button>
+      <button id="stop">Stop</button>
+      <button id="reset">Reset</button>
 
-      </div>
+    </div>
 
-      <div>
-        <h4>Route System</h4>
-        <button id="first">first</button>
-        <button id="last">last</button>
-      </div>
-      <div>
-        <h4>World</h4>
-        <form>
-          <label><input type="radio" name="size" value="s" id="s">S</label>
-          <label><input checked type="radio" name="size" value="m" id="m">M</label>
-          <label><input type="radio" name="size" value="l" id="l">L</label>
-        </form>
-      </div>
+    <div>
+      <h4>Route System</h4>
+      <button id="first">first</button>
+      <button id="last">last</button>
+    </div>
+    <div>
+      <h4>World</h4>
+      <form>
+        <label><input type="radio" name="size" value="s" id="s">S</label>
+        <label><input checked type="radio" name="size" value="m" id="m">M</label>
+        <label><input type="radio" name="size" value="l" id="l">L</label>
+      </form>
+    </div>
+    <div>
+      <h4>Speed</h4>
+      <form id="speedform">
+        <label><input type="radio" name="speed" value="200" id="s">1</label>
+        <label><input type="radio" name="speed" value="30" id="s">2</label>
+        <label><input checked type="radio" name="speed" value="10" id="m">3</label>
+        <label><input type="radio" name="speed" value="4" id="l">4</label>
+        <label><input type="radio" name="speed" value="1" id="l">5</label>
+        <label><input type="radio" name="speed" value="-1" id="l">Super</label>
+      </form>
+    </div>
   </div>
   <script type="module" src="view.js"></script>
   <script type="module" src="maze.js"></script>

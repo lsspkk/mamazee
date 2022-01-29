@@ -186,6 +186,7 @@ function runEngine(tiles, tileset, goals) {
 app.renderer.resize(world.width * 20, world.height * 20)
 export function resetMaze() {
   clearEngine()
+  deadEndCounter = 0
   clearWorld()
   clearMapTiles(tiles)
   app.renderer.resize(world.width * 20, world.height * 20)
@@ -193,16 +194,20 @@ export function resetMaze() {
   makeStartMove()
   engine.crossQueue.push(world.start)
   goals = []
+  if( end ) {
+    app.stage.removeChild(end)
+    end = undefined
+  }
 }
 
 let tileset = undefined
 let tiles = undefined
 let goals = undefined
+let end = undefined
 
 // load tileset
 app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
   tileset = PIXI.utils.TextureCache['tileset.png']
-  let end = undefined
 
   resetMaze()
   app.ticker.speed = 3
@@ -212,7 +217,7 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
     engine.life = engine.life + 1
     try {
       if (engine.speed !== 0 && engine.life % engine.speed === 0) {
-        if (engine.speed === 10) {
+        if (engine.speed === -1) {
           while (true) runEngine(tiles, tileset, goals)
         } else 
         {
@@ -224,12 +229,6 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
         engine.speed = 0
         if (goals.length === 0) return
         goals.sort((a, b) => b.life - a.life)
-        end = makeNamedTile(t.STAR, tileset)
-        end.x = goals[0].x * 20 + 10
-        end.y = goals[0].y * 20 + 10
-        end.anchor.x = 0.5
-        end.anchor.y = 0.5
-        app.stage.addChild(end)
         //console.log(goals[0])
 
         for (let i = 0; i < goals.length; i++) {
@@ -240,6 +239,14 @@ app.loader.add('tileset', 'tileset.png').load((loader, resources) => {
           app.stage.addChild(tile)
           i = i + i
         }
+
+        end = makeNamedTile(t.STAR, tileset)
+        end.x = goals[0].x * 20 + 10
+        end.y = goals[0].y * 20 + 10
+        end.anchor.x = 0.5
+        end.anchor.y = 0.5
+        app.stage.addChild(end)
+
       }
     }
   })

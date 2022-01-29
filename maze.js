@@ -33,7 +33,7 @@ export let world = initialworld
 
 export function clearWorld() {
   world.grid = [...Array(world.height).keys()]
-    .map((x) => [...Array(world.width).keys()].map(y => {
+    .map((y) => [...Array(world.width).keys()].map(x => {
       const name = isStart(x, y) ? t.STAR : t.EMPTY
       return { name }
     })

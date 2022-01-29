@@ -5,7 +5,7 @@ import { resetMaze, setEngineSpeed } from './view.js'
 export const state = {
   system: 0,
   choises: ['first', 'last'],
-  speed: 1,
+  speed: 10,
 }
 
 export const menu = []
@@ -70,6 +70,16 @@ const buttons = {
 function getSize() {
   return document.forms[0].elements['size'].value
 }
+function getSpeed() {
+  return Number(document.forms[1].elements['speed'].value)
+}
+
+document.getElementById('speedform').onclick = () => {
+  state.speed = getSpeed()
+  setEngineSpeed(state.speed)
+}
+
+
 function r(s) {
   return Math.floor((Math.random() * (s - 1)) / 2 + s / 4)
 }

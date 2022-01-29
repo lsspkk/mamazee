@@ -43,3 +43,7 @@ lähtöpisteestä alkaen täytä ruutua siten että
 # dev
 
 https://www.snowpack.dev/tutorials/getting-started
+
+snopacking cahchessa jotain mätää
+
+ "start": "snowpack dev --reload",
